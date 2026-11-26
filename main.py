@@ -1,39 +1,30 @@
 #!/usr/bin/env python3
-"""The Internet in One Word — entrypoint.
+"""The Internet in One Word — entry program.
 
-Writes the winning word to /output/entry.txt.
-Winner of the internal pairwise tournament (see tournament.md):
-"brainrot" — funny by itself, true of the whole internet, surprising,
-and lands in one beat.
+Writes a single word describing the whole internet to /output/entry.txt.
+Gate (RULES.txt): /output/entry.txt must be UTF-8 text of 1 to 30
+characters, not only white space.
 """
 
 import os
 
-WORD = "brainrot"
-
-
-def validate_word(word: str) -> str:
-    """Gate: the entry must be exactly one word, 1-30 characters.
-
-    Rejects empty input, whitespace inside the word, and anything longer
-    than the competition's one-word limit, before anything is written.
-    """
-    if not word:
-        raise ValueError("WORD must not be empty")
-    if len(word) > 30:
-        raise ValueError(f"WORD must be 1-30 characters, got {len(word)}")
-    if any(ch.isspace() for ch in word):
-        raise ValueError(f"WORD must be a single word without spaces, got {word!r}")
-    return word
+WORD = "doomscroll"
 
 
 def main() -> None:
-    word = validate_word(WORD)
+    word = WORD.strip()
+    assert 1 <= len(word) <= 30, "word must be 1-30 characters"
+    assert word, "word must not be empty"
+    assert " " not in word and "\n" not in word, "entry must be a single word"
     os.makedirs("/output", exist_ok=True)
-    path = "/output/entry.txt"
-    with open(path, "w", encoding="utf-8", newline="") as f:
+    with open("/output/entry.txt", "w", encoding="utf-8") as f:
         f.write(word)
-    os.chmod(path, 0o644)
+    # Read-back verification: the file must hold exactly the word, nothing else.
+    with open("/output/entry.txt", "r", encoding="utf-8") as f:
+        written = f.read()
+    assert written == word, "entry.txt does not match the word"
+    assert 1 <= len(written) <= 30, "entry.txt outside the 1-30 character gate"
+    print(f"Wrote {len(written)} characters to /output/entry.txt")
 
 
 if __name__ == "__main__":
